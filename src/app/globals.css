@@ -1,41 +1,24 @@
-@import "tailwindcss";
+/* Custom styles for Jsons Group CMS */
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-  --industrial-blue: #1E3A8A;
-  --steel-gray: #64748B;
-  --metal-silver: #F1F5F9;
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --color-industrial-blue: var(--industrial-blue);
-  --color-steel-gray: var(--steel-gray);
-  --color-metal-silver: var(--metal-silver);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: var(--font-sans), system-ui, sans-serif;
-}
-
-.ql-editor {
+/* Rich text editor customizations */
+.mantine-RichTextEditor-content {
   min-height: 200px;
 }
 
-.ql-toolbar {
-  border-top: 1px solid #e5e7eb;
-  border-left: 1px solid #e5e7eb;
-  border-right: 1px solid #e5e7eb;
+/* Custom scrollbar for better UX */
+::-webkit-scrollbar {
+  width: 8px;
 }
 
-.ql-container {
-  border-bottom: 1px solid #e5e7eb;
-  border-left: 1px solid #e5e7eb;
-  border-right: 1px solid #e5e7eb;
+::-webkit-scrollbar-track {
+  background: #f1f3f4;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
 }

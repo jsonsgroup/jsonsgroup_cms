@@ -2,8 +2,22 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { PlusIcon, PencilIcon, TrashIcon } from '@heroicons/react/24/outline';
-import { format } from 'date-fns';
+import {
+  Table,
+  Group,
+  Text,
+  ActionIcon,
+  Badge,
+  Button,
+  Stack,
+  Card,
+  Skeleton,
+  Center
+} from '@mantine/core';
+import { modals } from '@mantine/modals';
+import { notifications } from '@mantine/notifications';
+import { IconPlus, IconEdit, IconTrash } from '@tabler/icons-react';
+import dayjs from 'dayjs';
 
 interface Page {
   _id: string;
@@ -36,98 +50,142 @@ export default function PagesPage() {
     }
   };
 
-  const deletePage = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this page?')) return;
-    
-    try {
-      const response = await fetch(`/api/pages/${id}`, {
-        method: 'DELETE',
-      });
-      
-      if (response.ok) {
-        setPages(pages.filter(page => page._id !== id));
-      }
-    } catch (error) {
-      console.error('Failed to delete page:', error);
-    }
+  const deletePage = async (id: string, title: string) => {
+    modals.openConfirmModal({
+      title: 'Delete Page',
+      children: (
+        <Text size="sm">
+          Are you sure you want to delete "{title}"? This action cannot be undone.
+        </Text>
+      ),
+      labels: { confirm: 'Delete', cancel: 'Cancel' },
+      confirmProps: { color: 'red' },
+      onConfirm: async () => {
+        try {
+          const response = await fetch(`/api/pages/${id}`, {
+            method: 'DELETE',
+          });
+          
+          if (response.ok) {
+            setPages(pages.filter(page => page._id !== id));
+            notifications.show({
+              title: 'Success',
+              message: 'Page deleted successfully',
+              color: 'green'
+            });
+          }
+        } catch (error) {
+          notifications.show({
+            title: 'Error',
+            message: 'Failed to delete page',
+            color: 'red'
+          });
+        }
+      },
+    });
   };
 
   if (loading) {
-    return <div className="animate-pulse">Loading pages...</div>;
+    return (
+      <Stack>
+        <Skeleton height={40} />
+        <Card withBorder>
+          <Stack>
+            {Array.from({ length: 5 }).map((_, i) => (
+              <Skeleton key={i} height={60} />
+            ))}
+          </Stack>
+        </Card>
+      </Stack>
+    );
   }
 
-  return (
-    <div>
-      <div className="sm:flex sm:items-center mb-6">
-        <div className="sm:flex-auto">
-          <p className="mt-2 text-sm text-gray-700">
-            Manage your website pages and content.
-          </p>
+  const rows = pages.map((page) => (
+    <Table.Tr key={page._id}>
+      <Table.Td>
+        <div>
+          <Text fw={500}>{page.title}</Text>
+          <Text size="sm" c="dimmed">/{page.slug}</Text>
         </div>
-        <div className="mt-4 sm:mt-0 sm:ml-16 sm:flex-none">
-          <Link
-            href="/admin/pages/new"
-            className="inline-flex items-center justify-center rounded-md border border-transparent bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 sm:w-auto"
+      </Table.Td>
+      <Table.Td>
+        <Badge
+          color={page.status === 'published' ? 'green' : 'yellow'}
+          variant="light"
+        >
+          {page.status}
+        </Badge>
+      </Table.Td>
+      <Table.Td>
+        <Text size="sm">{page.company}</Text>
+      </Table.Td>
+      <Table.Td>
+        <Text size="sm" c="dimmed">
+          {dayjs(page.updatedAt).format('MMM D, YYYY')}
+        </Text>
+      </Table.Td>
+      <Table.Td>
+        <Group gap="xs">
+          <ActionIcon
+            component={Link}
+            href={`/admin/pages/${page._id}/edit`}
+            variant="subtle"
+            color="blue"
           >
-            <PlusIcon className="h-4 w-4 mr-2" />
-            New Page
-          </Link>
-        </div>
-      </div>
+            <IconEdit size={16} />
+          </ActionIcon>
+          <ActionIcon
+            variant="subtle"
+            color="red"
+            onClick={() => deletePage(page._id, page.title)}
+          >
+            <IconTrash size={16} />
+          </ActionIcon>
+        </Group>
+      </Table.Td>
+    </Table.Tr>
+  ));
 
-      <div className="bg-white shadow overflow-hidden sm:rounded-md">
-        <ul className="divide-y divide-gray-200">
-          {pages.length === 0 ? (
-            <li className="px-6 py-4 text-center text-gray-500">
-              No pages found. Create your first page to get started.
-            </li>
-          ) : (
-            pages.map((page) => (
-              <li key={page._id}>
-                <div className="px-4 py-4 flex items-center justify-between">
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center justify-between">
-                      <p className="text-sm font-medium text-blue-600 truncate">
-                        {page.title}
-                      </p>
-                      <div className="ml-2 flex-shrink-0 flex">
-                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                          page.status === 'published' 
-                            ? 'bg-green-100 text-green-800' 
-                            : 'bg-yellow-100 text-yellow-800'
-                        }`}>
-                          {page.status}
-                        </span>
-                      </div>
-                    </div>
-                    <div className="mt-2 flex">
-                      <div className="flex items-center text-sm text-gray-500">
-                        <p className="truncate">
-                          /{page.slug} • {page.company} • Updated {format(new Date(page.updatedAt), 'MMM d, yyyy')}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <Link
-                      href={`/admin/pages/${page._id}/edit`}
-                      className="text-blue-600 hover:text-blue-900"
-                    >
-                      <PencilIcon className="h-5 w-5" />
-                    </Link>
-                    <button
-                      onClick={() => deletePage(page._id)}
-                      className="text-red-600 hover:text-red-900"
-                    >
-                      <TrashIcon className="h-5 w-5" />
-                    </button>
-                  </div>
-                </div>
-              </li>
-            ))
-          )}
-        </ul>
-      </div>
-    </div>
+  return (
+    <Stack>
+      <Group justify="space-between">
+        <div>
+          <Text c="dimmed">
+            Manage your website pages and content.
+          </Text>
+        </div>
+        <Button
+          component={Link}
+          href="/admin/pages/new"
+          leftSection={<IconPlus size={16} />}
+        >
+          New Page
+        </Button>
+      </Group>
+
+      <Card withBorder>
+        {pages.length === 0 ? (
+          <Center p="xl">
+            <Stack align="center">
+              <Text size="lg" fw={500}>No pages found</Text>
+              <Text c="dimmed">Create your first page to get started.</Text>
+            </Stack>
+          </Center>
+        ) : (
+          <Table>
+            <Table.Thead>
+              <Table.Tr>
+                <Table.Th>Title</Table.Th>
+                <Table.Th>Status</Table.Th>
+                <Table.Th>Company</Table.Th>
+                <Table.Th>Updated</Table.Th>
+                <Table.Th>Actions</Table.Th>
+              </Table.Tr>
+            </Table.Thead>
+            <Table.Tbody>{rows}</Table.Tbody>
+          </Table>
+        )}
+      </Card>
+    </Stack>
   );
 }

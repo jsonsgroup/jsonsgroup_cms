@@ -1,42 +1,59 @@
+import { Container, Title, Text, SimpleGrid, Card, Button, Box } from '@mantine/core';
 import Link from 'next/link';
 
 export default function Home() {
+  const companies = [
+    'Jsons Foundry',
+    'Western Precicast I', 
+    'Western Precicast II',
+    'Jsons Engineering',
+    'Jsons Precision',
+    'Jsons Industries'
+  ];
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-900 to-gray-900">
-      <div className="container mx-auto px-4 py-16">
-        <div className="text-center">
-          <h1 className="text-5xl font-bold text-white mb-6">
+    <Box
+      style={{
+        minHeight: '100vh',
+        background: 'linear-gradient(135deg, #1e3a8a 0%, #374151 100%)',
+        color: 'white'
+      }}
+    >
+      <Container size="lg" py={80}>
+        <Box ta="center">
+          <Title order={1} size={60} fw={700} mb={24}>
             Jsons Group
-          </h1>
-          <p className="text-xl text-gray-300 mb-12 max-w-3xl mx-auto">
+          </Title>
+          <Text size="xl" c="gray.3" mb={48} maw={800} mx="auto">
             Leading metal casting & manufacturing conglomerate with 6 specialized companies
             delivering precision solutions across industries.
-          </p>
+          </Text>
           
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 mb-16">
-            {[
-              'Jsons Foundry',
-              'Western Precicast I', 
-              'Western Precicast II',
-              'Jsons Engineering',
-              'Jsons Precision',
-              'Jsons Industries'
-            ].map((company) => (
-              <div key={company} className="bg-white/10 backdrop-blur-sm rounded-lg p-6 text-white">
-                <h3 className="text-lg font-semibold mb-2">{company}</h3>
-                <p className="text-gray-300 text-sm">Specialized manufacturing solutions</p>
-              </div>
+          <SimpleGrid cols={{ base: 1, sm: 2, lg: 3 }} spacing="lg" mb={48}>
+            {companies.map((company) => (
+              <Card key={company} p="lg" radius="md" style={{ backgroundColor: 'rgba(255, 255, 255, 0.1)', backdropFilter: 'blur(10px)' }}>
+                <Title order={3} size="lg" c="white" mb={8}>
+                  {company}
+                </Title>
+                <Text size="sm" c="gray.3">
+                  Specialized manufacturing solutions
+                </Text>
+              </Card>
             ))}
-          </div>
+          </SimpleGrid>
           
-          <Link
+          <Button
+            component={Link}
             href="/admin"
-            className="inline-flex items-center px-8 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors"
+            size="lg"
+            radius="md"
+            variant="filled"
+            color="blue"
           >
             Access CMS Dashboard
-          </Link>
-        </div>
-      </div>
-    </div>
+          </Button>
+        </Box>
+      </Container>
+    </Box>
   );
 }
